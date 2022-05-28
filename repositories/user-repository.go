@@ -123,6 +123,9 @@ func (*userRepository) RefreshTokenHandler(c *fiber.Ctx) error {
 
 	isExpired := services.TokenService.IsRefreshTokenExpired(refreshToken.ExpiresAt)
 	if isExpired {
+		if err := internals.Database.Delete(&refreshToken).Error; err != nil {
+			return c.Status(500).SendString("Error while deleting the expired refresh token")
+		}
 		return c.Status(403).SendString("Refresh token has expired")
 	}
 
